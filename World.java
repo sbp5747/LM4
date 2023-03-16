@@ -3,43 +3,49 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class World {
-    private String[][] world;
-    private Point starting_position;
+    public static String[][] world;
+    private static Point startingPosition = new Point(0, 0);
+    public static ArrayList<MapTile> history = new ArrayList<MapTile>();
 
-    public World() {
-        world = new String[5][5]; // Set the world size to 5x5
-        starting_position = new Point(0, 0); // Set the starting position to (0, 0)
-    }
-
-    public void load_tiles() {
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("map.txt"));
-            ArrayList<String> rows = new ArrayList<String>();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                rows.add(line);
+    public void loadTiles() {
+        List<String[]> rows = new ArrayList<>();
+        try (BufferedReader f = new BufferedReader(new FileReader("src/map.txt"))) {
+            String row;
+            while ((row = f.readLine()) != null) {
+                rows.add(row.split("\t"));
             }
-            reader.close();
-
-            int numRows = rows.size();
-            int numCols = rows.get(0).split(",").length;
-
-            world = new String[numRows][numCols];
-
-            for (int i = 0; i < numRows; i++) {
-                String[] tiles = rows.get(i).split(",");
-                for (int j = 0; j < numCols; j++) {
-                    world[i][j] = tiles[j];
-                    if (tiles[j].equals("S")) {
-                        starting_position.setLocation(j, i);
+            int xMax = rows.get(0).length;
+            world = new String[rows.size()][xMax];
+            for (int y = 0; y < rows.size(); y++) {
+                String[] cols = rows.get(y);
+                for (int x = 0; x < xMax; x++) {
+                    String tileName = cols[x];
+                    if (tileName.equals("Starting Point")) {
+                        startingPosition.x = x;
+                        startingPosition.y = y;
                     }
+                    world[y][x] = tileName.equals(" ") ? null : tileName;
                 }
             }
-
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    public static String[][] getWorld() {
+        return world;
+    }
+
+    public static Point getStartingPosition() {
+        return startingPosition;
+    }
+
+    public static ArrayList<MapTile> getHistory() {
+        return history;
+}
+
+
 }
